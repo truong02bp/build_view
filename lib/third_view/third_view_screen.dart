@@ -23,7 +23,7 @@ class ThirdViewScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Image.asset("assets/images/congratulations.png"),
+                          Expanded(child: Image.asset("assets/images/congratulations.png")),
                           const Text(
                             'Congratulations',
                             style: TextStyle(
