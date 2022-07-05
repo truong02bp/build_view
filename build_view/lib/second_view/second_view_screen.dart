@@ -2,7 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:rikkeisoft_intern/third_view/third_view_screen.dart';
 
 class SecondViewScreen extends StatelessWidget {
-  const SecondViewScreen({Key? key}) : super(key: key);
+  final employees = [
+    {'name': 'Nguyễn Huy Trường', 'team': 'A'},
+    {'name': 'Lê Thu Trang', 'team': 'B'},
+    {'name': 'Nguyễn Khả Khiêm', 'team': 'A'},
+    {'name': 'Nguyễn Huy Giang', 'team': 'C'},
+    {'name': 'Phạm Hồng Thái', 'team': 'A'},
+    {'name': 'Vũ Ngọc Hồng Nhung', 'team': 'B'},
+    {'name': 'Nguyễn Thị Thanh Phương', 'team': 'C'},
+    {'name': 'Hoàng Thái Sơn', 'team': 'A'},
+    {'name': 'Nguyễn Giang Ngân', 'team': 'B'},
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -24,36 +34,40 @@ class SecondViewScreen extends StatelessWidget {
         ]),
         body: ListView(
           padding: const EdgeInsets.all(5),
-          children: [
-            _buildTitle(title: 'Team A'),
-            _buildListItem(name: 'John'),
-            _buildListItem(name: 'Beth'),
-            const SizedBox(
-              height: 15,
-            ),
-            _buildTitle(title: 'Team B'),
-            _buildListItem(name: 'Will'),
-            _buildListItem(name: 'Miranda'),
-            const SizedBox(
-              height: 15,
-            ),
-            _buildTitle(title: 'Team C'),
-            _buildListItem(name: 'Mike'),
-            _buildListItem(name: 'Danny'),
-          ],
+          children: _buildListViewBody(),
         ));
+  }
+
+  List<Widget> _buildListViewBody() {
+    List<Widget> widgets = [];
+    employees.sort(
+      (a, b) => a['team']!.compareTo(b['team']!),
+    );
+    String team = '';
+    for (int i = 0; i < employees.length; i++) {
+      final employee = employees[i];
+      if (team == '' || i >0 && employees[i - 1]['team'] != employee['team']) {
+        team = employee['team']!;
+        widgets.add(_buildTitle(title: 'Team $team'));
+      }
+      widgets.add(_buildItem(name: employee['name']!));
+    }
+    return widgets;
   }
 
   Widget _buildTitle({required String title}) {
     return Center(
-        child: Text(
-      title,
-      style: const TextStyle(
-          fontSize: 18, color: Colors.black, fontWeight: FontWeight.w800),
+        child: Container(
+      margin: const EdgeInsets.only(top: 5),
+      child: Text(
+        title,
+        style: const TextStyle(
+            fontSize: 18, color: Colors.black, fontWeight: FontWeight.w800),
+      ),
     ));
   }
 
-  Container _buildListItem({required String name}) {
+  Container _buildItem({required String name}) {
     return Container(
       height: 70,
       margin: const EdgeInsets.only(top: 15),
