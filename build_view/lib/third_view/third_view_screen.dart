@@ -46,25 +46,30 @@ class ThirdViewScreen extends StatelessWidget {
                                 decoration: BoxDecoration(
                                     border: Border.all(
                                         width: 0.5, color: Colors.grey)),
-                                child: Center(
-                                    child: Row(
-                                  children: const [
-                                    SizedBox(
-                                      width: 20,
-                                    ),
-                                    Icon(
-                                      Icons.cancel,
-                                      color: Colors.grey,
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Text(
-                                      'Cancel',
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                  ],
-                                )),
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Center(
+                                      child: Row(
+                                    children: const [
+                                      SizedBox(
+                                        width: 20,
+                                      ),
+                                      Icon(
+                                        Icons.cancel,
+                                        color: Colors.grey,
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text(
+                                        'Cancel',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                    ],
+                                  )),
+                                ),
                               ),
                               const SizedBox(
                                 width: 20,
@@ -75,25 +80,30 @@ class ThirdViewScreen extends StatelessWidget {
                                 decoration: const BoxDecoration(
                                   color: Colors.blue,
                                 ),
-                                child: Center(
-                                    child: Row(
-                                  children: const [
-                                    SizedBox(
-                                      width: 20,
-                                    ),
-                                    Icon(
-                                      Icons.check,
-                                      color: Colors.white,
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Text(
-                                      'Claim',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  ],
-                                )),
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Center(
+                                      child: Row(
+                                    children: const [
+                                      SizedBox(
+                                        width: 20,
+                                      ),
+                                      Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text(
+                                        'Claim',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ],
+                                  )),
+                                ),
                               ),
                             ],
                           )
