@@ -1,4 +1,4 @@
-import 'package:social_network_mobile_ui/models/media.dart';
+import 'package:dio_restful/models/media.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'user.g.dart';
