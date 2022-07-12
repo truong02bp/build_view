@@ -14,10 +14,16 @@ class GetPostEvent extends PostEvent {
 
 }
 
-class RebuildUpdatePost extends PostEvent {
+class CreatePostEvent extends PostEvent {
   final Post post;
 
-  RebuildUpdatePost({required this.post});
+  CreatePostEvent({required this.post});
+}
+
+class RebuildUpdatePostEvent extends PostEvent {
+  final Post post;
+
+  RebuildUpdatePostEvent({required this.post});
 }
 
 

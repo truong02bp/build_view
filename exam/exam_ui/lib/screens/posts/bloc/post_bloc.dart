@@ -19,10 +19,12 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     _onGetPostEvent();
     _onDeletePostEvent();
     _onRebuildPostUpdateEvent();
+    _onCreatePostEvent();
   }
 
   _onInitialEvent(){
     on<PostInitialEvent>((event, emit) {
+      state.posts.clear();
       state.page = 0;
       state.limit = 20;
       state.user = event.user;
@@ -40,6 +42,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
         emit(state.clone(postStatus: PostStatus.getPostSuccess));
       }
     });
+
   }
 
   _onDeletePostEvent() {
@@ -53,13 +56,20 @@ class PostBloc extends Bloc<PostEvent, PostState> {
   }
 
   _onRebuildPostUpdateEvent() {
-    on<RebuildUpdatePost>((event, emit) {
+    on<RebuildUpdatePostEvent>((event, emit) {
       for (int i=0;i<state.posts.length;i++) {
         if (state.posts[i].id == event.post.id) {
           state.posts[i] = event.post;
           break;
         }
       }
+      emit(state.clone(postStatus: PostStatus.updatePostSuccess));
+    });
+  }
+
+  _onCreatePostEvent() {
+    on<CreatePostEvent>((event, emit) {
+      state.posts.insert(0, event.post);
       emit(state.clone(postStatus: PostStatus.updatePostSuccess));
     });
   }

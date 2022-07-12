@@ -117,7 +117,7 @@ class AddPostScreen extends StatelessWidget {
                       closeIcon: const Icon(Icons.close_fullscreen_outlined),
                       desc: 'Upload post success!',
                       btnOkOnPress: () {
-                        Navigator.pop(context);
+                        Navigator.pop(context, {'post' : state.post});
                       },
                     ).show();
                   }

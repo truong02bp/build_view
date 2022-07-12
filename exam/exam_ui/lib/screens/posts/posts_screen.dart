@@ -47,7 +47,10 @@ class PostScreen extends StatelessWidget {
                       MaterialPageRoute(
                           builder: (context) => AddPostScreen(user: user)))
                   .then((value) {
-                bloc.add(PostInitialEvent(user: user));
+                    final post = value['post'];
+                    if (post != null) {
+                      bloc.add(CreatePostEvent(post: post));
+                    }
               });
             },
             child: SizedBox(
@@ -150,7 +153,7 @@ class PostScreen extends StatelessWidget {
                                                       (value) {
                                                     final post = value['post'];
                                                     if (post != null) {
-                                                      bloc.add(RebuildUpdatePost(post: post));
+                                                      bloc.add(RebuildUpdatePostEvent(post: post));
                                                     }
                                                   });
                                                 });
