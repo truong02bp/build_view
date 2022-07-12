@@ -14,9 +14,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 class PostScreen extends StatelessWidget {
   final User user;
-  List<Post> posts = [];
-  int page = 0;
-  int limit = 20;
   ScrollController _scrollController = ScrollController();
 
   PostScreen({required this.user});
@@ -36,8 +33,7 @@ class PostScreen extends StatelessWidget {
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        bloc.add(GetPostEvent(userId: user.id, page: page + 1, limit: limit));
-        page += 1;
+        bloc.add(GetPostEvent());
       }
     });
     return Scaffold(
@@ -51,8 +47,6 @@ class PostScreen extends StatelessWidget {
                       MaterialPageRoute(
                           builder: (context) => AddPostScreen(user: user)))
                   .then((value) {
-                posts.clear();
-                page = 0;
                 bloc.add(PostInitialEvent(user: user));
               });
             },
@@ -73,14 +67,12 @@ class PostScreen extends StatelessWidget {
       body: BlocBuilder<PostBloc, PostState>(
         bloc: bloc,
         buildWhen: (previous, current) =>
-            current is GetPostSuccess || current is DeletePostSuccess,
+            current.status == PostStatus.getPostSuccess ||
+            current.status == PostStatus.deletePostSuccess ||
+            current.status == PostStatus.updatePostSuccess,
         builder: (context, state) {
-          if (state is GetPostSuccess) {
-            posts.addAll(state.posts);
-          }
-          if (state is DeletePostSuccess) {
-            posts.removeWhere((element) => element.id == state.postId);
-          }
+          print(state.status);
+          final posts = state.posts;
           return ListView.builder(
               controller: _scrollController,
               itemCount: posts.length,
@@ -91,6 +83,7 @@ class PostScreen extends StatelessWidget {
                   likes = post.interactBy!.length;
                 }
                 return InkWell(
+                  key: ValueKey(post.id),
                   onDoubleTap: () {
                     Navigator.push(
                         context,
@@ -142,19 +135,27 @@ class PostScreen extends StatelessWidget {
                                 ),
                                 Spacer(),
                                 PopupMenuButton(
-                                    itemBuilder: (context) => [
+                                    itemBuilder: (contexts) => [
                                           PopupMenuItem(
-                                              child: InkWell(
-                                                  onTap: () {
-                                                    Navigator.pop(context);
-                                                    Navigator.push(context, MaterialPageRoute(builder: (context) => EditPost(post: post)
-                                                    )).then((value){
-                                                      posts.clear();
-                                                      page = 0;
-                                                      bloc.add(PostInitialEvent(user: user));
-                                                    });
-                                                  },
-                                                  child: Text('Edit'))),
+                                              onTap: () {
+                                                WidgetsBinding.instance
+                                                    .addPostFrameCallback((_) {
+                                                  Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              EditPost(
+                                                                  post:
+                                                                      post))).then(
+                                                      (value) {
+                                                    final post = value['post'];
+                                                    if (post != null) {
+                                                      bloc.add(RebuildUpdatePost(post: post));
+                                                    }
+                                                  });
+                                                });
+                                              },
+                                              child: Text('Edit')),
                                           PopupMenuItem(
                                               child: InkWell(
                                                   onTap: () {
@@ -178,14 +179,16 @@ class PostScreen extends StatelessWidget {
                           ),
                           post.media == null
                               ? Container()
-                              : ClipRRect(
-                                  child: CachedNetworkImage(
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) {
-                                      return Image.asset(
-                                          'assets/images/loading.gif');
-                                    },
-                                    imageUrl: minioHost + post.media!.url,
+                              : Center(
+                                  child: ClipRRect(
+                                    child: CachedNetworkImage(
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) {
+                                        return Image.asset(
+                                            'assets/images/loading.gif');
+                                      },
+                                      imageUrl: minioHost + post.media!.url,
+                                    ),
                                   ),
                                 ),
                           Padding(

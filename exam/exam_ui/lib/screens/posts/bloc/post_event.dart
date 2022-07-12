@@ -11,12 +11,15 @@ class PostInitialEvent extends PostEvent {
 }
 
 class GetPostEvent extends PostEvent {
-  int userId;
-  int page;
-  int limit;
 
-  GetPostEvent({required this.userId, required this.page, required this.limit});
 }
+
+class RebuildUpdatePost extends PostEvent {
+  final Post post;
+
+  RebuildUpdatePost({required this.post});
+}
+
 
 class DeletePostEvent extends PostEvent {
   int postId;

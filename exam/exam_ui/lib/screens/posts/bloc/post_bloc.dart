@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:exam_ui/models/post.dart';
@@ -13,24 +14,53 @@ part 'post_state.dart';
 class PostBloc extends Bloc<PostEvent, PostState> {
   PostRepository postRepository = PostRepository.getInstance();
 
-  PostBloc() : super(PostInitial()) {
-    on<PostInitialEvent>((event, emit) {
-      add(GetPostEvent(userId: event.user.id, page: 0, limit: 20));
-    });
+  PostBloc() : super(PostState()) {
+    _onInitialEvent();
+    _onGetPostEvent();
+    _onDeletePostEvent();
+    _onRebuildPostUpdateEvent();
+  }
 
+  _onInitialEvent(){
+    on<PostInitialEvent>((event, emit) {
+      state.page = 0;
+      state.limit = 20;
+      state.user = event.user;
+      add(GetPostEvent());
+    });
+  }
+
+  _onGetPostEvent(){
     on<GetPostEvent>((event, emit) async {
       List<Post>? posts = await postRepository.getPostByUserId(
-          userId: event.userId, page: event.page, limit: event.limit);
+          userId: state.user!.id, page: state.page, limit: state.limit);
+      state.page++;
       if (posts != null) {
-        emit(GetPostSuccess(posts: posts));
+        state.posts.addAll(posts);
+        emit(state.clone(postStatus: PostStatus.getPostSuccess));
       }
     });
+  }
 
+  _onDeletePostEvent() {
     on<DeletePostEvent>((event, emit) async {
       String? message = await postRepository.deleteById(id: event.postId);
       if (message != null) {
-        emit(DeletePostSuccess(postId: event.postId));
+        state.posts.removeWhere((element) => element.id == event.postId);
+        emit(state.clone(postStatus: PostStatus.deletePostSuccess));
       }
+    });
+  }
+
+  _onRebuildPostUpdateEvent() {
+    on<RebuildUpdatePost>((event, emit) {
+      for (int i=0;i<state.posts.length;i++) {
+        if (state.posts[i].id == event.post.id) {
+          state.posts[i] = event.post;
+          break;
+        }
+      }
+      emit(state.clone(postStatus: PostStatus.updatePostSuccess));
     });
   }
 }

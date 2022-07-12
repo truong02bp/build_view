@@ -1,18 +1,26 @@
 part of 'post_bloc.dart';
 
-@immutable
-abstract class PostState {}
+enum PostStatus {normal, initial, getPostSuccess, deletePostSuccess, updatePostSuccess }
 
-class PostInitial extends PostState {}
+class PostState {
+  List<Post> posts = [];
+  User? user;
+  int page = 0;
+  int limit = 20;
+  PostStatus status = PostStatus.initial;
 
-class GetPostSuccess extends PostState {
-  final List<Post> posts;
+  PostState({
+    this.user
+  });
 
-  GetPostSuccess({required this.posts});
-}
+  PostState clone({required PostStatus postStatus}) {
+    PostState postState = PostState();
+    postState.status = postStatus;
+    postState.page = this.page;
+    postState.posts = this.posts;
+    postState.user = this.user;
+    postState.limit = this.limit;
+    return postState;
+  }
 
-class DeletePostSuccess extends PostState {
-  int postId;
-
-  DeletePostSuccess({required this.postId});
 }

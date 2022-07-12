@@ -3,13 +3,20 @@ part of 'edit_post_bloc.dart';
 @immutable
 abstract class EditPostEvent {}
 
-class UpdatePost extends EditPostEvent {
-  final File? file;
-  final String? caption;
-  final int postId;
-  final int? mediaId;
+class EditPostInitialEvent extends EditPostEvent {
+  final Post post;
 
-  UpdatePost({required this.file, required this.caption, required this.postId, this.mediaId});
+  EditPostInitialEvent({required this.post});
+}
+
+class UpdatePost extends EditPostEvent {
+
+}
+
+class UpdateCaption extends EditPostEvent {
+  String value;
+
+  UpdateCaption(this.value);
 }
 
 class PickImage extends EditPostEvent {

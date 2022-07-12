@@ -1,22 +1,20 @@
 part of 'edit_post_bloc.dart';
 
-@immutable
-abstract class EditPostState {}
+enum EditPostStatus { initial, pickImageSuccess, removeImageSuccess, updatePostSuccess}
 
-class EditPostInitial extends EditPostState {}
+class EditPostState {
+  File? file;
+  EditPostStatus status = EditPostStatus.initial;
+  Post? post;
+  int? mediaId;
 
-class PickImageSuccess extends EditPostState {
-  final File file;
 
-  PickImageSuccess(this.file);
-}
-
-class RemoveImageSuccess extends EditPostState {
-
-}
-
-class UpdatePostSuccess extends EditPostState {
-  final Post post;
-
-  UpdatePostSuccess({required this.post});
+  EditPostState clone({required EditPostStatus status}) {
+    final state = EditPostState();
+    state.post = this.post;
+    state.file = this.file;
+    state.status = status;
+    state.mediaId = this.mediaId;
+    return state;
+  }
 }

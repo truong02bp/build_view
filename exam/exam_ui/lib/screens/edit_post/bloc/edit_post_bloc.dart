@@ -17,33 +17,57 @@ class EditPostBloc extends Bloc<EditPostEvent, EditPostState> {
   PostRepository postRepository = PostRepository.getInstance();
 
 
-  EditPostBloc() : super(EditPostInitial()) {
+  EditPostBloc() : super(EditPostState()) {
+
+    on<EditPostInitialEvent>((event, emit) {
+      state.post = event.post;
+    });
+
     on<PickImage>((event, emit) {
-      emit(PickImageSuccess(event.file));
+      state.file = event.file;
+      emit(state.clone(status: EditPostStatus.pickImageSuccess));
     });
 
     on<RemoveImage>((event, emit) {
-      emit(RemoveImageSuccess());
+      if (state.file != null) {
+        state.file = null;
+      }
+      else {
+        state.mediaId = state.post!.media!.id;
+      }
+      emit(state.clone(status: EditPostStatus.removeImageSuccess));
     });
 
+    on<UpdateCaption>((event, emit) {
+      if (state.post != null) {
+        state.post!.caption = event.value;
+      }
+    });
+    _onUpdatePostEvent();
+  }
+
+  _onUpdatePostEvent() {
     on<UpdatePost>((event, emit) async {
       PostDto postDto = PostDto();
-      postDto.postId = event.postId;
-      if (event.caption != null) {
-        postDto.caption = event.caption;
+      postDto.postId = state.post!.id;
+      postDto.caption = state.post!.caption;
+      print(state.mediaId);
+      postDto.mediaId = state.mediaId;
+      final file = state.file;
+      File? uploadFile;
+      if (file != null) {
+        uploadFile = File(file.path);
       }
-      if (event.file != null) {
-        List<int> bytes = List.from(await event.file!.readAsBytes());
+      if (uploadFile != null) {
+        List<int> bytes = List.from(await uploadFile.readAsBytes());
         postDto.bytes = base64Encode(bytes);
         postDto.name =
-            event.file!.path.substring(event.file!.path.lastIndexOf("/") + 1);
-      }
-      if (event.mediaId != null) {
-        postDto.mediaId = event.mediaId;
+            uploadFile.path.substring(uploadFile.path.lastIndexOf("/") + 1);
       }
       Post? post = await postRepository.updatePost(postDto: postDto);
       if (post != null) {
-        emit(UpdatePostSuccess(post: post));
+        state.post = post;
+        emit(state.clone(status: EditPostStatus.updatePostSuccess));
       }
     });
   }

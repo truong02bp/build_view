@@ -5,6 +5,7 @@ import 'package:exam_ui/components/comment_card.dart';
 import 'package:exam_ui/constants.dart';
 import 'package:exam_ui/models/post.dart';
 import 'package:exam_ui/screens/edit_post/bloc/edit_post_bloc.dart';
+import 'package:exam_ui/screens/posts/bloc/post_bloc.dart';
 import 'package:exam_ui/time_ultils.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -15,9 +16,6 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 
 class EditPost extends StatelessWidget {
   Post post;
-  XFile? file;
-  String? caption;
-  int? mediaId;
   final ImagePicker _picker = ImagePicker();
 
   EditPost({required this.post});
@@ -25,7 +23,7 @@ class EditPost extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => EditPostBloc(),
+      create: (context) => EditPostBloc()..add(EditPostInitialEvent(post: post)),
       child: Builder(
         builder: (context) => _buildView(context),
       ),
@@ -45,12 +43,7 @@ class EditPost extends StatelessWidget {
         actions: [
           InkWell(
               onTap: () {
-                File? uploadFile;
-                if (file != null) {
-                  uploadFile = File(file!.path);
-                }
-                bloc.add(UpdatePost(
-                    file: uploadFile, caption: caption, postId: post.id, mediaId: mediaId));
+                bloc.add(UpdatePost());
               },
               child: const Center(child: Text('Update'))),
           const SizedBox(
@@ -107,7 +100,7 @@ class EditPost extends StatelessWidget {
           ),
           TextFormField(
             onChanged: (value) {
-              post.caption = value;
+              bloc.add(UpdateCaption(value));
             },
             keyboardType: TextInputType.multiline,
             maxLength: null,
@@ -121,10 +114,10 @@ class EditPost extends StatelessWidget {
               errorBorder: InputBorder.none,
             ),
           ),
-          BlocConsumer(
+          BlocConsumer<EditPostBloc, EditPostState>(
               bloc: bloc,
               listener: (context, state) {
-                if (state is UpdatePostSuccess) {
+                if (state.status == EditPostStatus.updatePostSuccess) {
                   AwesomeDialog(
                     context: context,
                     dialogType: DialogType.SUCCES,
@@ -133,36 +126,33 @@ class EditPost extends StatelessWidget {
                     closeIcon: const Icon(Icons.close_fullscreen_outlined),
                     desc: 'Upload post success!',
                     btnOkOnPress: () {
-                      Navigator.pop(context);
+                      Navigator.pop(context, {"post" : state.post});
                     },
                   ).show();
                 }
               },
-              buildWhen: (previous, current) => current is PickImageSuccess || current is RemoveImageSuccess,
+              buildWhen: (previous, current) => current.status ==  EditPostStatus.pickImageSuccess || current.status == EditPostStatus.removeImageSuccess,
               builder: (context, state) {
+                print(state.status);
                 Widget child = Container();
-                if (post.media != null && mediaId == null) {
-                  child = ClipRRect(
-                    child: CachedNetworkImage(
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) {
-                        return Image.asset('assets/images/loading.gif');
-                      },
-                      imageUrl: minioHost + post.media!.url,
+                if (post.media != null && state.mediaId == null) {
+                  child = Center(
+                    child: ClipRRect(
+                      child: CachedNetworkImage(
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) {
+                          return Image.asset('assets/images/loading.gif');
+                        },
+                        imageUrl: minioHost + post.media!.url,
+                      ),
                     ),
                   );
                 }
-                if (state is RemoveImageSuccess) {
-                  if (file != null) {
-                    file = null;
-                  }
-                  else {
-                    mediaId = post.media!.id;
+                if (state.status == EditPostStatus.removeImageSuccess) {
                     child = Container();
-                  }
                 }
-                if (state is PickImageSuccess) {
-                  child = Image.file(state.file);
+                if (state.status ==  EditPostStatus.pickImageSuccess) {
+                  child = Image.file(state.file!);
                 }
                 return Stack(children: [
                   child,
@@ -232,9 +222,9 @@ class EditPost extends StatelessWidget {
   }
 
   void getFromSource(bloc) async {
-    file = await _picker.pickImage(source: ImageSource.gallery);
+    final file = await _picker.pickImage(source: ImageSource.gallery);
     if (file != null) {
-      bloc.add(PickImage(File(file!.path)));
+      bloc.add(PickImage(File(file.path)));
     }
   }
 }
